@@ -1,0 +1,92 @@
+<body>
+    <div class="new-status">
+        <h2>New monolog</h2>
+        <form action="">
+            <textarea></textarea><br>
+            <input type="submit" value="Post">
+        </form>
+    </div>
+
+    <div class="statuses">
+        <h2>Monologs</h2>
+        <ul></ul>
+    </div>
+
+    <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+    <script src="http://fb.me/react-0.13.3.js"></script>
+    <script src="http://fb.me/JSXTransformer-0.13.3.js"></script>
+    <script type="text/jsx">
+    React.render(
+        <div className="app">
+            <div className="new-status">
+                <h2>New monolog</h2>
+                <form action="">
+                    <textarea /><br />
+                    <input type="submit" value="Post" />
+                </form>
+            </div>
+
+            <div className="statuses">
+                <h2>Monologs</h2>
+                <ul></ul>
+            </div>
+        </div>
+    , document.body);
+
+    $(document).ready(function() {
+        // 아까 코드 그대로
+    });
+    </script>
+</body>
+
+var NewStatus = React.createClass({
+    render: function() {
+        return <div className="new-status">
+            <h2>New monolog</h2>
+            <form action="" onSubmit={this.handleSubmit}>
+                <textarea ref="text" /><br />
+                <input type="submit" value="Post" />
+            </form>
+        </div>;
+    },
+    handleSubmit: function(e) {
+        e.preventDefault();
+
+        var self = this;
+        var $text = $(React.findDOMNode(this.refs.text));
+        $.ajax({
+            url: '/status',
+            type: 'POST',
+            dataType: 'json',
+            data: { text: $text.val() },
+            success: function(data) {
+                self.props.onCreate(data);
+                $text.val('');
+            }
+        });
+    }
+});
+
+var App = React.createClass({
+    getInitialState: function() {
+        return {items: []};
+    },
+    render: function() {
+        return <div className="app">
+            <NewStatus onCreate={this.handleCreate} />
+            <div className="statuses">
+                <h2>Monologs</h2>
+                <ul>{this.state.items.map(function(item) {
+                    return <li>{item.text}</li>;
+                })}</ul>
+            </div>
+        </div>;
+    },
+    handleCreate: function(data) {
+        this.setState({
+            items: this.state.items.concat(data)
+        });
+    }
+});
+
+React.render(<App />, document.body);
